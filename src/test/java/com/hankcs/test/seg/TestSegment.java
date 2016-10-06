@@ -47,7 +47,7 @@ public class TestSegment extends TestCase
         HanLP.Config.enableDebug();
         Segment segment = new DijkstraSegment();
         System.out.println(segment.seg(
-                "并有望在那与1993年就结识的友人重聚。"
+                "我遗忘我的密码了"
         ));
     }
 
@@ -146,6 +146,11 @@ public class TestSegment extends TestCase
         System.out.println(HanLP.segment("鱼300克*2/组"));
     }
 
+    public void testIssue313() throws Exception
+    {
+        System.out.println(HanLP.segment("hello\n" + "world"));
+    }
+
     public void testQuickAtomSegment() throws Exception
     {
         String text = "你好1234abc Good一二三四3.14";
@@ -205,6 +210,22 @@ public class TestSegment extends TestCase
         System.out.println(termList);
         termList = IndexTokenizer.segment("15307971214话费还有多少");
         System.out.println(termList);
+    }
+
+    public void testIssue199() throws Exception
+    {
+        Segment segment = new CRFSegment();
+        segment.enableCustomDictionary(false);// 开启自定义词典
+        segment.enablePartOfSpeechTagging(true);
+        List<Term> termList = segment.seg("更多采购");
+        System.out.println(termList);
+        for (Term term : termList)
+        {
+            if (term.nature == null)
+            {
+                System.out.println("识别到新词：" + term.word);
+            }
+        }
     }
 
     public void testMultiThreading() throws Exception
@@ -300,6 +321,27 @@ public class TestSegment extends TestCase
         System.out.println(segment.seg("曾幻想过，若干年后的我就是这个样子的吗"));
     }
 
+    public void testIssue193() throws Exception
+    {
+        String[] testCase = new String[] {
+                "以每台约200元的价格送到苹果售后维修中心换新机（苹果的保修基本是免费换新机）",
+                "可能以2500~2800元的价格回收",
+                "3700个益农信息社打通服务“最后一公里”",
+                "一位李先生给高政留言说上周五可以帮忙献血",
+                "一位浩宁达高层透露",
+                "五和万科长阳天地5个普宅项目",
+                "以1974点低点和5178点高点作江恩角度线",
+                "纳入统计的18家京系基金公司",
+                "华夏基金与嘉实基金两家京系基金公司",
+                "则应从排名第八的投标人开始依次递补三名投标人"
+        };
+        Segment segment = HanLP.newSegment().enableOrganizationRecognize(true).enableNumberQuantifierRecognize(true);
+        for (String sentence : testCase) {
+            List<Term> termList = segment.seg(sentence);
+            System.out.println(termList);
+        }
+    }
+
     public void testTime() throws Exception
     {
         TraditionalChineseTokenizer.segment("认可程度");
@@ -327,8 +369,15 @@ public class TestSegment extends TestCase
 
     public void testTraditionalSegment() throws Exception
     {
-        CustomDictionary.insert("义消人员");
-        String text = "基隆市長林右昌對義消人員長期協助消防救災工作";
+        String text = "吵架吵到快取消結婚了";
         System.out.println(TraditionalChineseTokenizer.segment(text));
+    }
+
+    public void testIssue290() throws Exception
+    {
+//        HanLP.Config.enableDebug();
+        String txt = "而其他肢解出去的七个贝尔公司如西南贝尔、太平洋贝尔、大西洋贝尔。";
+        Segment seg_viterbi = new ViterbiSegment().enablePartOfSpeechTagging(true).enableOffset(true).enableNameRecognize(true).enablePlaceRecognize(true).enableOrganizationRecognize(true).enableNumberQuantifierRecognize(true);
+        System.out.println(seg_viterbi.seg(txt));
     }
 }
